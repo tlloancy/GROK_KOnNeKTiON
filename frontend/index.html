@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grok Chat</title>
+    <style>
+        /* Ajoute du style ici */
+   body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #fafafa;
+            margin-bottom: 20px;
+        }
+        .chat-box div {
+            margin-bottom: 10px;
+        }
+        .chat-box .user {
+            text-align: right;
+            color: blue;
+        }
+        .chat-box .grok {
+            text-align: left;
+            color: green;
+        }
+        input[type="textarea"], button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Talk to Grok</h2>
+        <div id="chatBox" class="chat-box"></div>
+        <input type="textarea" id="userMessage" placeholder="Ask Grok something..." />
+        <button id="pureButt" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chatBox');
+document.getElementById('userMessage').addEventListener('keydown', function(event) {
+  // Check if Enter was pressed
+  if (event.keyCode === 13) {
+    // Prevent the default action
+    event.preventDefault();
+    
+    // Trigger the button click
+    document.getElementById('pureButt').click();
+  }
+});
+        function sendMessage() {
+            const userMessage = document.getElementById('userMessage').value;
+            if (userMessage.trim() === '') return;
+
+            // Afficher le message de l'utilisateur
+            const userDiv = document.createElement('div');
+            userDiv.className = 'user';
+            userDiv.innerText = userMessage;
+            chatBox.appendChild(userDiv);
+
+            // Envoyer le message à Flask
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: userMessage }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Afficher la réponse de Grok
+                const grokDiv = document.createElement('div');
+                grokDiv.className = 'grok';
+                grokDiv.innerText = data.response;
+                chatBox.appendChild(grokDiv);
+
+                // Effacer l'entrée utilisateur
+                document.getElementById('userMessage').value = '';
+            })
+            .catch(error => {
+                console.error('Erreur :', error);
+            });
+        }
+    </script>
+</body>
+</html>
+
